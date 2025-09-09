@@ -6,6 +6,7 @@ import { buildConfigWithDefaults } from '../buildConfigWithDefaults.js'
 import { devUser } from '../credentials.js'
 import { MediaCollection } from './collections/Media/index.js'
 import { PostsCollection, postsSlug } from './collections/Posts/index.js'
+import { Stores } from './collections/Stores/index.js'
 import { MenuGlobal } from './globals/Menu/index.js'
 
 const filename = fileURLToPath(import.meta.url)
@@ -13,7 +14,42 @@ const dirname = path.dirname(filename)
 
 export default buildConfigWithDefaults({
   // ...extend config here
-  collections: [PostsCollection, MediaCollection],
+  collections: [
+    PostsCollection,
+    MediaCollection,
+    Stores,
+    {
+      slug: 'users',
+      auth: true, // Keep authentication enabled
+      admin: {
+        useAsTitle: 'email',
+      },
+      fields: [
+        // Email and password fields are automatically added by `auth: true`
+        // Add your custom fields here
+        {
+          name: 'role',
+          type: 'select',
+          relationTo: 'stores',
+          hasMany: true,
+          label: {
+            sv: 'Butiker',
+            en: 'Stores',
+          },
+          options: [
+            { label: 'Admin', value: 'admin' },
+            { label: 'Editor', value: 'editor' },
+            { label: 'User', value: 'user' },
+          ],
+          defaultValue: 'user',
+          admin: {
+            // This field can be bulk edited
+            disableBulkEdit: false,
+          },
+        },
+      ],
+    },
+  ],
   admin: {
     importMap: {
       baseDir: path.resolve(dirname),
